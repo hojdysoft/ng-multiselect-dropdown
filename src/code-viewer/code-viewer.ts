@@ -133,8 +133,8 @@ export class CodeViewerComponent implements OnInit, OnChanges, AfterViewChecked 
         }
         this.needUpdate = false;
 
-        if (this.codeView.nativeElement.innerHTML) {
-            hljs.highlightBlock(this.codeView.nativeElement);
-        }
+        // if (this.codeView.nativeElement.innerHTML) {
+        //     hljs.highlightBlock(this.codeView.nativeElement);
+        // }
     }
 }

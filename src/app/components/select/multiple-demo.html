@@ -3,7 +3,7 @@
     <div class="col-md-4">
       <h3>Select Multiple Cities</h3>
       <form [formGroup]="myForm">
-        <ng-multiselect-dropdown 
+        <ng-multiselect-dropdown
           name="city" [placeholder]="'Select City'" [data]="cities" formControlName="city" [disabled]="disabled" [settings]="dropdownSettings" (onDropDownClose)="onDropDownClose()" (onSelect)="onItemSelect($event)" (onDeSelect)="onItemDeSelect($event)" (onSelectAll)="onSelectAll($event)">
         </ng-multiselect-dropdown>
       </form>
@@ -33,12 +33,27 @@
       </div>
       <div class="checkbox">
         <label>
-          <input type="checkbox" [checked]="limitShow" [(ngModel)]="limitShow" (change)="handleLimitShow()"> Limit Items Shown to 3
+          <input type="checkbox" [checked]="limitShow" [(ngModel)]="limitShow" (change)="handleLimitShow(3)"> Limit Items Shown to 3
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" [checked]="limitShow1" [(ngModel)]="limitShow1" (change)="handleLimitShow(1)"> Limit Items Shown to 1
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" [checked]="onlySingleLineInSelection" [(ngModel)]="onlySingleLineInSelection" (change)="onlySingleLineInSelectionChange()"> Only single line in selection
         </label>
       </div>
       <div class="checkbox">
         <label>
           <input type="checkbox" [checked]="disableBangalore" [(ngModel)]="disableBangalore" (change)="handleDisableBangalore()"> Disable Bangalore
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" [checked]="disableDiacritic" [(ngModel)]="disableDiacritic" (change)="handledisableDiacritic()"> Disable Diacritic
         </label>
       </div>
       <div class="checkbox">

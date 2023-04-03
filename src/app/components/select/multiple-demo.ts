@@ -12,11 +12,15 @@ export class MultipleDemoComponent implements OnInit {
   ShowFilter = true;
   showAll = true;
   limitSelection = false;
+  disableDiacritic = false;
   limitShow = false;
+  limitShow1 = false;
   disableBangalore = true;
   cities: Array<any> = [];
   selectedItems: Array<any> = [];
   dropdownSettings: IDropdownSettings = {};
+  onlySingleLineInSelection: false;
+
   htmlCode = `
     &lt;form [formGroup]="myForm"&gt;
         &lt;ng-multiselect-dropdown
@@ -113,16 +117,22 @@ export class MultipleDemoComponent implements OnInit {
 
   ngOnInit() {
     this.cities = [
-      { item_id: 1, item_text: 'New Delhi', item_tooltip: 'The capital of India!' },
-      { item_id: 2, item_text: 'Mumbai' },
+      { item_id: 1, item_text: 'Tento text bude oříznut třemi tečkami, pokud bude příliš dlouhý pro svůj kontejner.', item_tooltip: 'Tento text bude oříznut třemi tečkami, pokud bude příliš dlouhý pro svůj kontejner.' },
+      { item_id: 2, item_text: 'Další velmi dlouhý text, ahoj babi jak se máš' },
       { item_id: 3, item_text: 'Bangalore', isDisabled: this.disableBangalore },
-      { item_id: 4, item_text: 'Pune' },
-      { item_id: 5, item_text: 'Chennai' },
-      { item_id: 6, item_text: 'Navsari' }
+      { item_id: 4, item_text: 'mám se dobře' },
+      { item_id: 5, item_text: 'Příliš žluťoučký kůň.' },
+      { item_id: 6, item_text: 'pěkné' },
+      { item_id: 7, item_text: 'Really very long name of city ůalksdj laksdj fůlasjdf ůlksdjf' },
     ];
+    for (let i = 7; i < 1000; i++) {
+      this.cities.splice(i,0,{ item_id: i+1, item_text: 'Navsari' });
+    }
+
     this.selectedItems = [
-      { item_id: 4, item_text: 'Pune' },
-      { item_id: 6, item_text: 'Navsari' }
+      { item_id: 1, item_text: 'Tento text bude oříznut třemi tečkami, pokud bude příliš dlouhý pro svůj kontejner.' },
+      { item_id: 4, item_text: 'mám se dobře' },
+      { item_id: 5, item_text: 'Příliš žluťoučký kůň.' }
     ];
     this.dropdownSettings = {
       singleSelection: false,
@@ -134,7 +144,8 @@ export class MultipleDemoComponent implements OnInit {
       unSelectAllText: 'UnSelect All',
       enableCheckAll: this.showAll,
       itemsShowLimit: 999999,
-      allowSearchFilter: this.ShowFilter
+      allowSearchFilter: this.ShowFilter,
+      onlySingleLineInSelection: false
     };
     this.myForm = this.fb.group({
       city: [this.selectedItems]
@@ -183,10 +194,17 @@ export class MultipleDemoComponent implements OnInit {
     }
   }
 
-  handleLimitShow() {
-    if (this.limitShow) {
+  handledisableDiacritic() {
+    //this.disableDiacritic = !this.disableDiacritic;
+    this.dropdownSettings = Object.assign({}, this.dropdownSettings, {
+      disableDiacritic: this.disableDiacritic
+    });
+  }
+
+  handleLimitShow(customLimit: number) {
+    if (this.limitShow || this.limitShow1) {
       this.dropdownSettings = Object.assign({}, this.dropdownSettings, {
-        itemsShowLimit: 3
+        itemsShowLimit: customLimit
       });
     } else {
       this.dropdownSettings = Object.assign({}, this.dropdownSettings, {
@@ -196,7 +214,11 @@ export class MultipleDemoComponent implements OnInit {
     console.log()
   }
 
-
+  onlySingleLineInSelectionChange(){
+    this.dropdownSettings = Object.assign({}, this.dropdownSettings, {
+      onlySingleLineInSelection: this.onlySingleLineInSelection
+    });
+  }
 
 
   handleDisableBangalore() {

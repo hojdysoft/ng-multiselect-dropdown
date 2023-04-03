@@ -1,4 +1,4 @@
-import { Component, HostListener, forwardRef, Input, Output, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef } from "@angular/core";
+import { Component, HostListener, forwardRef, Input, Output, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef, ViewChild, ElementRef } from "@angular/core";
 import { NG_VALUE_ACCESSOR, ControlValueAccessor } from "@angular/forms";
 import { ListItem, IDropdownSettings } from "./multiselect.model";
 import { ListFilterPipe } from "./list-filter.pipe";
@@ -8,7 +8,7 @@ export const DROPDOWN_CONTROL_VALUE_ACCESSOR: any = {
   useExisting: forwardRef(() => MultiSelectComponent),
   multi: true
 };
-const noop = () => {};
+const noop = () => { };
 
 @Component({
   selector: "ng-multiselect-dropdown",
@@ -21,11 +21,17 @@ export class MultiSelectComponent implements ControlValueAccessor {
   public _settings: IDropdownSettings;
   public _data: Array<ListItem> = [];
   public selectedItems: Array<ListItem> = [];
+
+  @ViewChild('rightPartDiv', { static: false }) myDiv: ElementRef | undefined;
+  @ViewChild('ddc', { static: false }) ddc: ElementRef | undefined;
+
+
   public isDropdownOpen = true;
   _placeholder = "Select";
   private _sourceDataType = null; // to keep note of the source data type. could be array of string/number/object
   private _sourceDataFields: Array<String> = []; // store source data fields names
   filter: ListItem = new ListItem(this.data);
+
   defaultSettings: IDropdownSettings = {
     singleSelection: false,
     idField: "id",
@@ -46,7 +52,9 @@ export class MultiSelectComponent implements ControlValueAccessor {
     closeDropDownOnSelection: false,
     showSelectedItemsAtTop: false,
     defaultOpen: false,
-    allowRemoteDataSearch: false
+    allowRemoteDataSearch: false,
+    onlySingleLineInSelection: false,
+    noDiacritic: false
   };
 
   @Input()
@@ -67,6 +75,7 @@ export class MultiSelectComponent implements ControlValueAccessor {
     } else {
       this._settings = Object.assign(this.defaultSettings);
     }
+    setTimeout(() => { this.cdr.detectChanges(); }, 10);
   }
 
   @Input()
@@ -101,14 +110,22 @@ export class MultiSelectComponent implements ControlValueAccessor {
   private onTouchedCallback: () => void = noop;
   private onChangeCallback: (_: any) => void = noop;
 
+  public get visibleSelectedItems(): Array<ListItem> {
+    //we will render only visible items
+    if (this._settings.itemsShowLimit >= this.selectedItems.length)
+      return this.selectedItems;
+    let visibleItems = this.selectedItems.slice(0, this._settings.itemsShowLimit);
+    return visibleItems;
+  }
+
   onFilterTextChange($event) {
     this.onFilterChange.emit($event);
   }
 
   constructor(
-    private listFilterPipe:ListFilterPipe,
+    private listFilterPipe: ListFilterPipe,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   onItemClick($event: any, item: ListItem) {
     if (this.disabled || item.isDisabled) {
@@ -134,7 +151,7 @@ export class MultiSelectComponent implements ControlValueAccessor {
       if (this._settings.singleSelection) {
         try {
           if (value.length >= 1) {
-            this.selectedItems = [ this.deobjectify(value[0]) ];
+            this.selectedItems = [this.deobjectify(value[0])];
           }
         } catch (e) {
           // console.error(e.body.msg);
@@ -192,7 +209,7 @@ export class MultiSelectComponent implements ControlValueAccessor {
 
   isAllItemsSelected(): boolean {
     // get disabld item count
-    let filteredItems = this.listFilterPipe.transform(this._data,this.filter);
+    let filteredItems = this.listFilterPipe.transform(this._data, this.filter, this._settings.noDiacritic);
     const itemDisabledCount = filteredItems.filter(item => item.isDisabled).length;
     // take disabled items into consideration when checking
     if ((!this.data || this.data.length === 0) && this._settings.allowRemoteDataSearch) {
@@ -312,7 +329,7 @@ export class MultiSelectComponent implements ControlValueAccessor {
     }
     if (!this.isAllItemsSelected()) {
       // filter out disabled item first before slicing
-      this.selectedItems = this.listFilterPipe.transform(this._data,this.filter).filter(item => !item.isDisabled).slice();
+      this.selectedItems = this.listFilterPipe.transform(this._data, this.filter, this._settings.noDiacritic).filter(item => !item.isDisabled).slice();
       this.onSelectAll.emit(this.emittedValue(this.selectedItems));
     } else {
       this.selectedItems = [];
@@ -331,6 +348,18 @@ export class MultiSelectComponent implements ControlValueAccessor {
       fields.push(prop);
     }
     return fields;
+  }
+
+
+  public getMaxWidth(): number {
+    if (this.myDiv) {
+      var divWidth = this.myDiv.nativeElement.offsetWidth;
+      let ddcWidth = this.ddc.nativeElement.offsetWidth;
+      console.log("divWidth=" + divWidth);
+      console.log("ddcWidth=" + ddcWidth);
+      return ddcWidth - divWidth;
+    }
+    return undefined;
   }
 
 }
